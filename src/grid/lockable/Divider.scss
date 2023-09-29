@@ -1,0 +1,14 @@
+/**
+ * Region divider
+ */
+ .x-grid-region-divider {
+    position: absolute !important;
+    border-width: 0 0px 0 0px;
+    border-color: transparent;
+    z-index: 10;
+    pointer-events: none;
+    width: 1px;
+    border-style: solid;
+    opacity: 1;
+    background-color: blue;
+}

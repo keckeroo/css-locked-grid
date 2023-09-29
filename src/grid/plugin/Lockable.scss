@@ -1,0 +1,40 @@
+/*
+ * Adjust z-index for locked cells
+ */
+ 
+
+// TODO:
+// NEED TO ALSO ACCOUNT FOR HOVERED STYLING
+
+.x-headercontainer .x-gridcolumn.x-locked,
+.x-grid-filterbar .x-locked,
+.x-gridcell.x-locked {
+    z-index: 10;
+}
+
+.x-headercontainer .x-gridcolumn.x-locked,
+.x-grid-filterbar .x-locked,
+.x-gridcell.x-locked:not(.x-selected) {
+    background-color: var(--background-color);
+}
+
+/*
+ * Set background colour for selected locked cells as they are
+ * normally transparent and need to have the select colour manually
+ * applied.
+ *
+ * NOTE: This needs to be updated for various themes.
+ */
+
+.x-gridrow.x-selected .x-gridcell,
+.x-gridcell.x-locked.x-selected {
+    background-color: var(--selected-background-color);
+}
+
+/**
+ * extender-drag-handle
+ */
+.x-selmodel-extender-drag-handle {
+    z-index: 12;
+    background-color: green;
+}
