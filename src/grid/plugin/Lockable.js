@@ -216,12 +216,13 @@ Ext.define('Ext.grid.plugin.Lockable', {
 
             refresh: 'refreshRegions',
             resize: 'refreshRegions',
+            columnadd: 'refreshRegions',
+            columnremove: 'refreshRegions',
             columnhide: 'refreshRegions',
             columnshow: 'refreshRegions',
             columnmove: 'refreshRegions',
             columnresize: 'refreshRegions',
-            beforeshowcolumnmenu: 'onBeforeShowColumnMenu',
-            columnlockedchange: 'onColumnLockedChange'
+            columnlockedchange: 'refreshRegions'
         })
     },
 
@@ -318,10 +319,6 @@ Ext.define('Ext.grid.plugin.Lockable', {
 
         handleChangedRegion: function (region, column) {
             column.setLocked(region);
-        },
-
-        onColumnLockedChange: function (grid, column, newValue, oldValue) {
-            grid.refreshRegions();
         }
     }
 

@@ -41,6 +41,8 @@ Ext.define('cssLockedGrid.grid.HeaderDropZone', {
         return true;
     },
 
+    // On drop override to assign/removed 'locked' column configuration depending
+    // upon region drop.
     onDrop: function (info) {
         var me = this,
             dropMethod = 'insertBefore',
