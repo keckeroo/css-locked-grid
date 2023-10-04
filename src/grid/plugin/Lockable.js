@@ -214,6 +214,7 @@ Ext.define('Ext.grid.plugin.Lockable', {
         grid.on({
             scope: me,
 
+            hide: 'onHide',
             refresh: 'refreshRegions',
             resize: 'refreshRegions',
             columnadd: 'refreshRegions',
@@ -222,11 +223,17 @@ Ext.define('Ext.grid.plugin.Lockable', {
             columnshow: 'refreshRegions',
             columnmove: 'refreshRegions',
             columnresize: 'refreshRegions',
+            beforeshowcolumnmenu: 'onBeforeShowColumnMenu',
             columnlockedchange: 'refreshRegions'
         })
     },
 
     privates: {
+
+        onHide: function() {
+            this.cmp.whenVisible('refresh');
+        },
+
         createDividers: function() {
             var grid = this.getCmp();
 

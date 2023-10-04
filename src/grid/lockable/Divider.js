@@ -20,6 +20,8 @@ Ext.define('Ext.grid.lockable.RegionDivider', {
             scope: me,
             refresh: 'showDivider',
             resize: 'showDivider',
+            columnadd: 'showDivider',
+            columnremove: 'showDivider',
             columnhide: 'showDivider',
             columnshow: 'showDivider',
             columnresize: 'showDivider',
