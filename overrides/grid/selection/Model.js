@@ -23,13 +23,16 @@ Ext.define('cssLockedGrid.grid.selectionModel', {
 
                     // FIXED method name
                     // was view.visibleColumn() - that is classic method
+                    // EXTJS-29997
                     if (view.getVisibleColumns().length) {
 
                         selData.eachCell(function (location) {
                             view.onCellDeselect(location);
                         });
                     } else {
-                        me.clearSelections();
+                        // clearSelections is now deselectAll
+                        // EXTJS-29997
+                        me.deselectAll();
                     }
                 }
                 // We have to deselect columns which have been hidden/removed
