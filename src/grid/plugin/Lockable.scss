@@ -9,7 +9,7 @@
 .x-headercontainer .x-gridcolumn.x-locked,
 .x-grid-filterbar .x-locked,
 .x-gridcell.x-locked {
-    z-index: 10;
+    z-index: 10;  // Mask is z-index 10
 }
 
 .x-headercontainer .x-gridcolumn.x-locked,

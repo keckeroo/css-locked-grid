@@ -65,6 +65,8 @@ Ext.define('cssLockedGrid.grid.column.Column', {
             colIndex = columns.indexOf(me),
             method, cls, pos;
 
+        me.locked = newVal;
+
         me.updateLockedCls(newVal);
 
         if (me.isRendered()) {

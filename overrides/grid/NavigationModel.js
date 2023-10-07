@@ -31,7 +31,7 @@ Ext.define('cssLockedGrid.grid.NavigationModel', {
         }
 
         // >>>>> NEW CODE
-        if (view.isLockedGrid && location && !location.column.getLocked() && view.hasLockedRegions()) {
+        if (view.isCssLockedGrid && location && !location.column.getLocked() && view.hasLockedRegions()) {
             Ext.apply(options, {
                 adjustForCenterRegion: true,
                 location: location
