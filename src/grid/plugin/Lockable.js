@@ -85,7 +85,7 @@ Ext.define('Ext.grid.plugin.Lockable', {
     setCmp: function (cmp) {
         this.cmp = cmp;
 
-        if (cmp && cmp.isGrid && !cmp.isLockedGrid) {
+        if (cmp && cmp.isGrid && !cmp.isCssLockedGrid) {
             this.decorate(cmp);
         } else {
             Ext.log.error('Lockable plugin can only be used included for Ext.grid.Grid based classes.');
@@ -100,7 +100,7 @@ Ext.define('Ext.grid.plugin.Lockable', {
             //
             Ext.override(target, {
                 // differentiate between lockable plugin and Ext.grid.locked.Grid
-                isLockedGrid: true,
+                isCssLockedGrid: true,
 
                 getRegions: function() {
                     return plugin.getRegions();
@@ -128,30 +128,24 @@ Ext.define('Ext.grid.plugin.Lockable', {
                 },
 
                 getCenterRegionBox: function () {
-                    var me = this,
-                        gridBox = me.el.getBox(),
-                        borders = me.el.getBorders(),
-                        borderPadding = me.el.getBorderPadding(),
-                        left = me.getRegionWidth('left') + (borderPadding.beforeX - borders.beforeX),
-                        right = (gridBox.right - gridBox.left - borderPadding.afterX) - me.getRegionWidth('right'),
+                    var grid = this,
+                        gridBox = grid.el.getBox(),
+                        borders = grid.el.getBorders(),
+                        borderPadding = grid.el.getBorderPadding(),
+                        left = grid.getRegionWidth('left') + (borderPadding.beforeX - borders.beforeX),
+                        right = (gridBox.right - gridBox.left - borderPadding.afterX) - grid.getRegionWidth('right'),
                         height = gridBox.height - (borderPadding.beforeY + borderPadding.afterY),
-                        titleHeight = me.getTitleBar() ? me.getTitleBar().getSize().height : 0;
-
-//console.log(borders);
-//console.log(borderPadding)
                         right = right - (borderPadding.afterX - borders.afterX);
 
+                    //console.log(borders);
+                    //console.log(borderPadding)
                     return {
                         x: left,
                         y: gridBox.y,
                         left: left,
                         right: right,
                         width: right - left,
-                        height: height,
-
-                        bodyTop: titleHeight + (borderPadding.beforeX - borders.beforeY),
-                        bodyHeight: height - titleHeight,
-                        bodyWidth: gridBox.width - (borderPadding.beforeX + borderPadding.afterX),
+                        height: height
                     };
                 },
 
@@ -260,6 +254,7 @@ Ext.define('Ext.grid.plugin.Lockable', {
                 use3d = true,
                 scroller = grid.getScrollable();
 
+                console.log('REFRESH REGIONS...')
             var offsets = grid.getRegionOffsets();
 //            console.log(scroller.getPosition())
             var lockedLeft = grid.el.query('.x-locked.x-locked-left');

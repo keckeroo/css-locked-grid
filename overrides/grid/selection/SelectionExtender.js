@@ -37,7 +37,7 @@ Ext.define('cssLockedGrid.grid.selection.SelectionExtender', {
     isHandleWithinView: function (view) {
         var me = this,
             // CHANGE
-            viewBox = view.isLockedGrid ? view.getCenterRegionBox() : view.el.getBox(),
+            viewBox = view.isCssLockedGrid ? view.getCenterRegionBox() : view.el.getBox(),
             handleBox = me.handle.getBox(),
             withinX;
 

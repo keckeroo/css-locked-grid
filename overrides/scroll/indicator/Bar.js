@@ -64,7 +64,7 @@ Ext.define('cssLockedGrid.scroll.indicator.Bar', {
                 me.spacerElement.setStyle(names.spacerMargin, (
                     Math.min(scrollSize, maxScrollSize) - 1
                 ) + 'px');
-console.log(axis, scrollSize, maxScrollSize);
+//console.log(axis, scrollSize, maxScrollSize);
 //                console.log(me.spacerElement);
 
                 if (axis === 'x') {
@@ -75,12 +75,12 @@ console.log(axis, scrollSize, maxScrollSize);
                     if (scroller.getUserClientSize()) {
                         clientSize = scroller.getUserClientSize()['x'];
                         adjust = scrollElSize - clientSize;
-                        console.log('scrollsize is ', scrollSize);
-                        console.log('scrollElsize is ', scrollElSize);
-                        console.log('adjust is ', adjust);
-                        console.log('clientSize is ', clientSize);
+//                        console.log('scrollsize is ', scrollSize);
+//                        console.log('scrollElsize is ', scrollElSize);
+//                        console.log('adjust is ', adjust);
+//                        console.log('clientSize is ', clientSize);
                         scrollSize = scrollSize - adjust; // (219 + 210);
-                        console.log('adjusted scrollSize is ', scrollSize)
+//                        console.log('adjusted scrollSize is ', scrollSize)
                         me.spacerElement.setStyle(names.spacerMargin, (
                             Math.min(scrollSize, maxScrollSize) - 1
                         ) + 'px');

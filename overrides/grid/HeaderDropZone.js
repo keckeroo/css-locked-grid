@@ -65,7 +65,7 @@ Ext.define('cssLockedGrid.grid.HeaderDropZone', {
         }
 
         // NEW - Update lock info
-        if (me.view.isLockedGrid) {
+        if (me.view.isCssLockedGrid) {
             sourceCmp.setLocked(targetCmp.getLocked())
         }
 
