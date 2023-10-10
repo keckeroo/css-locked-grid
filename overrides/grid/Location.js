@@ -68,9 +68,7 @@ Ext.define('cssLockedGrid.grid.Location', {
 
                 if (targetIndex === columns.length || !me.child.isGridRow) {
                     // We need to move down only if current row index > 1
-                    var count = isVirtualStore ? store.getCount() : store.getData.count();
-
-                    if (rowIndex < count - 1) {
+                    if (rowIndex < store.getCount() - 1) {
                         result = me.getUpdatedLocation(columns[0], rowIndex + 1);
                     }
                     else if (wrap) {
