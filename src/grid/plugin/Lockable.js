@@ -38,11 +38,13 @@ mylog = function() {
     }
 }
 
-Ext.define('Ext.grid.plugin.Lockable', {
+Ext.define('Ext.grid.plugin.CssLockedGrid', {
     extend: 'Ext.plugin.Abstract',
-    alias: 'plugin.lockable',
+    alias: 'plugin.csslockedgrid',
 
     requires: [ 'Ext.grid.lockable.RegionDivider' ],
+
+    lockedCls: Ext.baseCSSPrefix + 'css-locked-grid',
 
     config: {
         columnMenu: {
@@ -87,6 +89,7 @@ Ext.define('Ext.grid.plugin.Lockable', {
 
         if (cmp && cmp.isGrid && !cmp.isCssLockedGrid) {
             this.decorate(cmp);
+            cmp.addCls(this.lockedCls); // permits sass encapsulation.
         } else {
             Ext.log.error('Lockable plugin can only be used included for Ext.grid.Grid based classes.');
         }

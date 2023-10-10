@@ -38,7 +38,7 @@ Ext.define('cssLockedGrid.grid.selection.SelectionExtender', {
         var me = this,
             // CHANGE
             viewBox = view.isCssLockedGrid ? view.getCenterRegionBox() : view.el.getBox(),
-            handleBox = me.handle.getBox(),
+            handleBox = me.handle.getBox(false, true), // get position relative to grid body
             withinX;
 
         withinX = viewBox.left <= handleBox.left && viewBox.right >= (handleBox.right - handleBox.width);
