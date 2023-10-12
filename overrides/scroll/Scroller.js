@@ -84,7 +84,7 @@ Ext.define(null, {
                         newPosition.x = newPosition.x + centerRegionBox.right;
                     }
                 }
-                console.log('new position is ', newPosition.x);
+//                console.log('new position is ', newPosition.x);
 //                console.groupEnd()
             }
 
