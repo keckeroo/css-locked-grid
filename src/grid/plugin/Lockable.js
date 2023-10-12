@@ -18,25 +18,6 @@
 // - update visual representation of bottom scrollbars for windows
 // - focused cell should be focused when reusing cell during buffering (perhaps remembered)
 //
-// COMPLETED:
-// * scrollbar at bottom needs to be in center region only
-// * region delimiter using floating div
-// * with cell selection - click - drag column - click another cell - two cells have cell selected styling
-// * visual artifact when show/hide columns
-// * need to  redraw region dividers when add/show/remove/hide columns
-// * need to updated docked information when all items in a locked region are hidden
-// * region dividers needs to adjust correctly when grid width < client width
-// * spreadsheet selection should clear on any grid changes (columns, row insertions, etc)
-
-Ext.myLogEnabled = true;
-
-mylog = function() {
-    var display = true;
-
-    if (Ext.myLogEnabled) {
-        console.log(...arguments);
-    }
-}
 
 Ext.define('Ext.grid.plugin.CssLockedGrid', {
     extend: 'Ext.plugin.Abstract',
@@ -255,25 +236,17 @@ Ext.define('Ext.grid.plugin.CssLockedGrid', {
             var me = this,
                 grid = me.getCmp(),
                 use3d = true,
-                scroller = grid.getScrollable();
-
-                console.log('REFRESH REGIONS...')
-            var offsets = grid.getRegionOffsets();
-//            console.log(scroller.getPosition())
-            var lockedLeft = grid.el.query('.x-locked.x-locked-left');
-            var lockedRight = grid.el.query('.x-locked.x-locked-right');
-            var translateLeft = use3d ? `translate3d(${offsets.left}px, 0px, 0px)` : `translate(${offsets.left}px, 0px)`;
-            var translateRight = use3d ? `translate3d(${offsets.right}px, 0px, 0px)` : `translate(${offsets.right}px, 0px)`;
-            var centerBox = grid.getCenterRegionBox();
+                scroller = grid.getScrollable(),
+                offsets = grid.getRegionOffsets(),
+                lockedLeft = grid.el.query('.x-locked.x-locked-left'),
+                lockedRight = grid.el.query('.x-locked.x-locked-right'),
+                translateLeft = use3d ? `translate3d(${offsets.left}px, 0px, 0px)` : `translate(${offsets.left}px, 0px)`,
+                translateRight = use3d ? `translate3d(${offsets.right}px, 0px, 0px)` : `translate(${offsets.right}px, 0px)`,
+                centerBox = grid.getCenterRegionBox();
 
             lockedLeft.forEach(function (el) {
                 el.style.transform = translateLeft;
             });
-
-//            console.log('lockedRight is ', lockedRight)
-//            console.log('translateRight is ', translateRight);
-//            console.log('isScroll is ', isScroll);
-//            console.log('scroller.isVirtualScroller is ', scroller.isVirtualScroller);
 
             lockedRight.forEach(function (el) {
                 el.style.transform = translateRight;

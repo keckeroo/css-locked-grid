@@ -9,7 +9,6 @@ Ext.define('cssLockedGrid.grid.selection.SelectionExtender', {
     alignHandle: function () {
         var me = this,
             shouldDisplay,
-            view = me.view,
             lastCell = me.endPos,
             cellLocked = lastCell && lastCell.cell.getLocked();
 
@@ -38,8 +37,15 @@ Ext.define('cssLockedGrid.grid.selection.SelectionExtender', {
         var me = this,
             // CHANGE
             viewBox = view.isCssLockedGrid ? view.getCenterRegionBox() : view.el.getBox(),
-            handleBox = me.handle.getBox(false, true), // get position relative to grid body
+            handleBox = me.handle.getBox(),
+            offsets = me.handle.getOffsetsTo(view.el),
             withinX;
+
+            // Adjust for local coordinates
+            handleBox.left = offsets[0];
+            handleBox.top  = offsets[1];
+            handleBox.right = handleBox.left + handleBox.width;
+            handleBox.bottom = handleBox.top + handleBox.height;
 
         withinX = viewBox.left <= handleBox.left && viewBox.right >= (handleBox.right - handleBox.width);
         return withinX;
