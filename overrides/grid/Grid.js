@@ -5,11 +5,6 @@
  */
 Ext.define('EXTJS_29962.grid.Grid', {
     override: 'Ext.grid.Grid',
-
-    onStoreRefresh: function() {
-        debugger;
-        this.callParent();
-    },
     
     privates: {
         // Fix issue with cells not resizing when they are filtered out

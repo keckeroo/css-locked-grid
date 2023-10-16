@@ -14,7 +14,7 @@ Ext.define('cssLockedGrid.grid.HeaderContainer', {
 
     // If (re)configuring - sort items by region first
     add: function(items) {
-        if (this.isCssLockedGrid && this.items.length === 0) {
+        if (this.getGrid().isCssLockedGrid && this.items.length === 0) {
             this.sortByRegion(items);
         }
 
@@ -48,13 +48,16 @@ Ext.define('cssLockedGrid.grid.HeaderContainer', {
         },
 
         getLockedRegion: function(item) {
-            switch (item.locked) {
-                case (true || 'left') :
-                    return 'left';
-                case 'right':
-                    return 'right';
-                default:
-                    return 'center'
+            var locked = item.locked;
+
+            if (locked === true || locked === 'left') {
+                return 'left';
+            }
+            else if (locked === 'right') {
+                return 'right';
+            }
+            else {
+                return 'center';
             }
         }
     }
