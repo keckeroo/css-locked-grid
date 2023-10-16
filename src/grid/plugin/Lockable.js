@@ -92,7 +92,7 @@ Ext.define('Ext.grid.plugin.CssLockedGrid', {
 
                 getRegionWidth: function (region) {
                     var grid = this,
-                        scrollbarWidth = grid.getScrollable().scrollbarSize.width || 0,
+                        scrollbarWidth = grid.getScrollable().getScrollbarSize().width || 0,
                         regionColumns = grid.getVisibleColumns().filter(function (column) {
                             return column.getRegion() === region
                         }),
