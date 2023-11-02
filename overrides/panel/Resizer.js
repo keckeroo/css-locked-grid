@@ -174,6 +174,7 @@ Ext.define('cssLockedGrid.panel.Resizer', {
                 snapHeight: snap[1],
                 snapWidth: snap[0],
                 clearFlex: clearFlex,
+                positioned: (target.getTop() !== null || target.getLeft() !== null || target.getBottom() !== null || target.getRight !== null),
                 minHeight: me.calculateConstrain(target.getMinHeight(), minSize[1], defaultMinSize),
                 minWidth: me.calculateConstrain(target.getMinWidth(), minSize[0], defaultMinSize),
                 maxHeight: me.calculateConstrain(target.getMaxHeight(), maxSize[1], defaultMaxSize),
@@ -214,9 +215,138 @@ Ext.define('cssLockedGrid.panel.Resizer', {
             }
 
             e.stopPropagation();
-
             // Prevent any further drag events from completing
             return false;
+        },
+
+        handleDrag: function(e) {
+            var info, target, edge, asFloat, box, horz, vert, offsetWidth, offsetHeight,
+                adjustWidthOffset, adjustHeightOffset, modifiesX, modifiesY, minHeight,
+                minWidth, maxHeight, maxWidth, snappedWidth, snappedHeight, w, h, ratio,
+                dragRatio, oppX, oppY, newBox;
+
+            if (!this.dragStarted) {
+                return;
+            }
+
+            info = this.info;
+            target = info.target;
+            edge = info.edge;
+            asFloat = info.asFloat;
+            box = info.startBox;
+            horz = edge.horz;
+            vert = edge.vert;
+            offsetWidth = 0;
+            offsetHeight = 0;
+            adjustWidthOffset = edge.adjustWidthOffset;
+            adjustHeightOffset = edge.adjustHeightOffset;
+            modifiesX = asFloat && edge.adjustWidthOffset < 0;
+            modifiesY = asFloat && edge.adjustHeightOffset < 0;
+            minHeight = info.minHeight;
+            minWidth = info.minWidth;
+            maxHeight = info.maxHeight;
+            maxWidth = info.maxWidth;
+
+            if (adjustWidthOffset) {
+                offsetWidth = Math.round(adjustWidthOffset * e.deltaX);
+            }
+
+            if (adjustHeightOffset) {
+                offsetHeight = Math.round(adjustHeightOffset * e.deltaY);
+            }
+
+            newBox = {
+                width: box.width + offsetWidth,
+                height: box.height + offsetHeight,
+                x: box.x + (modifiesX ? -offsetWidth : 0),
+                y: box.y + (modifiesY ? -offsetHeight : 0)
+            };
+
+            w = newBox.width;
+            h = newBox.height;
+//            console.log(newBox);
+
+            snappedWidth = horz ? this.snap(w, info.snapWidth, offsetWidth > 0) : w;
+            snappedHeight = vert ? this.snap(h, info.snapHeight, offsetHeight > 0) : h;
+
+            if (w !== snappedWidth || h !== snappedHeight) {
+                if (modifiesX) {
+                    newBox.x -= snappedWidth - w;
+                }
+
+                if (modifiesY) {
+                    newBox.y -= snappedHeight - h;
+                }
+
+                newBox.width = w = snappedWidth;
+                newBox.height = h = snappedHeight;
+            }
+
+            if (horz && (w < minWidth || w > maxWidth)) {
+                newBox.width = w = Ext.Number.constrain(w, minWidth, maxWidth);
+
+                if (modifiesX) {
+                    newBox.x = box.x + (box.width - w);
+                }
+            }
+
+            if (vert && (h < minHeight || h > maxHeight)) {
+                newBox.height = h = Ext.Number.constrain(h, minHeight, maxHeight);
+
+                if (modifiesY) {
+                    newBox.y = box.y + (box.height - h);
+                }
+            }
+
+            if (asFloat && (info.preserveRatio || e.shiftKey)) {
+                ratio = info.ratio;
+
+                h = Math.min(Math.max(minHeight, w / ratio), maxHeight);
+                // Use newBox.height because we just overwrote h
+                w = Math.min(Math.max(minWidth, newBox.height * ratio), maxWidth);
+
+                if (horz && vert) {
+                    // corner
+                    oppX = box.x + (modifiesX ? box.width : 0);
+                    oppY = box.y + (modifiesY ? box.height : 0);
+
+                    dragRatio = Math.abs(oppX - e.pageX) / Math.abs(oppY - e.pageY);
+
+                    if (dragRatio > ratio) {
+                        newBox.height = h;
+                    }
+                    else {
+                        newBox.width = w;
+                    }
+
+                    if (modifiesX) {
+                        newBox.x = box.x - (newBox.width - box.width);
+                    }
+
+                    if (modifiesY) {
+                        newBox.y = box.y - (newBox.height - box.height);
+                    }
+                }
+                else if (horz) {
+                    // width only, adjust height to match
+                    newBox.height = h;
+                }
+                else {
+                    // height only, adjust width to match
+                    newBox.width = w;
+                }
+            }
+
+            if (target.hasListeners.resizedrag) {
+                target.fireEvent('resizedrag', target, {
+                    edge: info.edgeName,
+                    event: e,
+                    width: newBox.width,
+                    height: newBox.height
+                });
+            }
+
+            this.resize(newBox, e.type === 'dragend', e);
         },
 
         resize: function(newBox, atEnd, e) {
@@ -234,15 +364,19 @@ Ext.define('cssLockedGrid.panel.Resizer', {
                 floated = info.floated,
                 split = me.getSplit(),
                 onTarget = info.dynamic || atEnd,
+                positioned = info.positioned,
                 resizeTarget, isProxy, prop, diff, offset,
                 targetSibling = target.nextSibling() || target.previousSibling(),
                 targetParent, parentXY, positionEnd;
 
+            // If dynamic or at drag end - we are going to resize the target
             if (onTarget) {
                 resizeTarget = me.getTarget();
             }
             else {
+                // otherwise we are resizing the proxy
                 resizeTarget = info.proxy;
+                positioned = false;
                 isProxy = true;
             }
 
@@ -267,6 +401,14 @@ Ext.define('cssLockedGrid.panel.Resizer', {
                     }
                 }
 
+//                console.log('>>> resizeTarget.setSize(',                    horz ? newBox.width : 'nada', ',', vert ? newBox.height : 'nada', ') ', resizeTarget.id );
+//                console.log('>>> posChanged: ', posChanged);
+//                console.log(`${box.x} !== ${x} || ${box.y} !== ${y}`),
+//                console.log('>>> asFloat: ', asFloat);
+//                console.log('>>> floated: ', floated);
+//                console.log('>>> positioned: ', positioned);
+//                console.log('>>> resizeTarget: ', resizeTarget);
+
                 resizeTarget.setSize(
                     horz ? newBox.width : undefined, vert ? newBox.height : undefined
                 );
@@ -275,7 +417,7 @@ Ext.define('cssLockedGrid.panel.Resizer', {
                     resizeTarget.setFlex(null);
                 }
 
-                if (posChanged) {
+                if (posChanged && !positioned) {
                     positionEnd = !floated && onTarget;
 
                     if (positionEnd) {
