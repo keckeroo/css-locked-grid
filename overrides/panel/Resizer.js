@@ -387,14 +387,12 @@ Ext.define('cssLockedGrid.panel.Resizer', {
                 resizeTarget[edge.splitPosSetter](info.start + diff);
             }
             else {
-                // Prevent any adjustments in box sizing if we computed a new width which is
-                // outside the contraints of the resizer based on sibling information.
+                // Prevent any adjustments in box sizing if we computed a new width/height which is
+                // outside the constraints of the resizer based on sibling information.
                 if (split && !atEnd) {
                     if (
-                        newBox.width >= info.maxWidth ||
-                        newBox.width <= info.minWidth ||
-                        newBox.height >= info.maxHeight ||
-                        newBox.height <= info.minHeight
+                        horz && (newBox.width  >= info.maxWidth  || newBox.width  <= info.minWidth) ||
+                        vert && (newBox.height >= info.maxHeight || newBox.height <= info.minHeight)
                     ) {
                         // We are dragging out of bounds - just stop it.
                         return;
