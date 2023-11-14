@@ -6,45 +6,93 @@
 // TODO:
 // NEED TO ALSO ACCOUNT FOR HOVERED STYLING
 
-.x-css-locked-grid {
+$csslockedgrid-default-ui: dynamic((
+    item-color: $dataview-item-color, 
+    item-hovered-color: $dataview-item-hovered-color, 
+    item-selected-color: $dataview-item-selected-color, 
+    item-pressed-color: $dataview-item-pressed-color, 
+    item-background-color: $dataview-item-background-color, 
+    item-alt-background-color: $dataview-item-alt-background-color, 
+    item-hovered-background-color: $dataview-item-hovered-background-color, 
+    item-selected-background-color: $dataview-item-selected-background-color, 
+    item-pressed-background-color: $dataview-item-pressed-background-color, 
+    item-border-width: $dataview-item-border-width, 
+    item-border-style: $dataview-item-border-style, 
+    item-border-color: $dataview-item-border-color, 
+    item-hovered-border-color: $dataview-item-hovered-border-color, 
+    item-selected-border-color: $dataview-item-selected-border-color, 
+    item-pressed-border-color: $dataview-item-pressed-border-color, 
+    item-focused-outline-width: $dataview-item-focused-outline-width, 
+    item-focused-outline-style: $dataview-item-focused-outline-style, 
+    item-focused-outline-color: $dataview-item-focused-outline-color, 
+    item-focused-outline-offset: $dataview-item-focused-outline-offset, 
+    item-font-weight: $dataview-item-font-weight, 
+    item-font-size: $dataview-item-font-size, 
+    item-font-size-big: $dataview-item-font-size-big, 
+    item-line-height: $dataview-item-line-height, 
+    item-line-height-big: $dataview-item-line-height-big, 
+    item-font-family: $dataview-item-font-family, 
+    item-padding: $dataview-item-padding, 
+    item-padding-big: $dataview-item-padding-big 
+));
 
-    .x-headercontainer .x-gridcolumn.x-locked,
-    .x-grid-filterbar .x-locked,
+@mixin css-locked-grid-ui(
+    $ui: null
+) {
+    $ui-suffix: ui-suffix($ui);
+    
+    .#{$prefix}css-locked-grid {
 
-    .x-gridcell.x-locked {
-        z-index: 10;  // Mask is z-index 10
-    }
+        @include dataview-ui();
 
-    .x-headercontainer .x-gridcolumn.x-locked,
-    .x-grid-filterbar .x-locked,
-    .x-gridcell.x-locked:not(.x-selected) {
-        background-color: var(--background-color);
-    }
+        .x-headercontainer .x-gridcolumn.x-locked,
+        .x-grid-filterbar .x-locked,
+        .x-gridcell.x-locked {
+            z-index: 10;  // Mask is z-index 10
+        }
 
-    /*
-     * Set background colour for selected locked cells as they are
-     * normally transparent and need to have the select colour manually
-     * applied.
-     *
-     * NOTE: This needs to be updated for various themes.
-     */
+        .x-headercontainer .x-gridcolumn.x-locked,
+        .x-grid-filterbar .x-locked,
+        .x-gridcell {
+//        .x-gridcell.x-locked:not(.x-selected) {
+            background-color: $dataview-item-background-color;
+        }
 
-    .x-gridrow.x-selected .x-gridcell,
-    .x-gridcell.x-locked.x-selected {
-        background-color: var(--selected-background-color);
-    }
+        /*
+         * Set background colour for selected locked cells as they are
+         * normally transparent and need to have the select colour manually
+         * applied.
+         *
+         * NOTE: This needs to be updated for various themes.
+         */
 
-    /**
-     * Cell editing adjustment
-     */
-    .x-celleditor {
-        z-index: 9 !important;
-    }
+        .x-gridrow.x-selected .x-gridcell,
+        .x-gridcell.x-selected {
+            background-color: $dataview-item-selected-background-color;
+        }
 
-    /**
-     * extender-drag-handle
-     */
-    .x-selmodel-extender-drag-handle {
-        background-color: green;
+        .x-hovered  .x-gridcell{
+            background-color: $dataview-item-hovered-background-color;
+        }
+
+        .x-hovered.x-pressed  .x-gridcell {
+            background-color: $dataview-item-pressed-background-color;
+        }
+
+        /**
+         * Cell editing adjustment
+         */
+        .x-celleditor {
+            z-index: 9 !important;
+        }
+
+        /**
+         * extender-drag-handle
+         */
+        .x-selmodel-extender-drag-handle {
+            background-color: green;
+        }
     }
 }
+
+@include css-locked-grid-ui();
