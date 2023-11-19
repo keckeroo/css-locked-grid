@@ -1,10 +1,10 @@
 /*
- * Adjust z-index for locked cells
+ * cssLockedGrid Sass configuration
+ *
+ * TODO:
+ * - Striped rows (odd rows)
+ * - Add configuration to distinguish between zoomed and non zoomed media
  */
- 
-
-// TODO:
-// NEED TO ALSO ACCOUNT FOR HOVERED STYLING
 
 $csslockedgrid-default-ui: dynamic((
     item-color: $dataview-item-color, 
@@ -45,16 +45,20 @@ $csslockedgrid-default-ui: dynamic((
 
         @include dataview-ui();
 
-        .x-headercontainer .x-gridcolumn.x-locked,
-        .x-grid-filterbar .x-locked,
-        .x-gridcell.x-locked {
-            z-index: 10;  // Mask is z-index 10
+        .#{$prefix}gridrow .#{$prefix}cells-el {
+            background-color: $dataview-item-background-color;
         }
 
-        .x-headercontainer .x-gridcolumn.x-locked,
-        .x-grid-filterbar .x-locked,
-        .x-gridcell {
-//        .x-gridcell.x-locked:not(.x-selected) {
+        .#{$prefix}headercontainer .#{$prefix}gridcolumn.#{$prefix}locked,
+        .#{$prefix}grid-filterbar .#{$prefix}locked,
+        .#{$prefix}gridcell.#{$prefix}locked {
+            z-index: 10;  // Mask is z-index 10
+            bo#{$prefix}shadow: 0px -1px 0px 0px $dataview-item-background-color, 0px 2px 0px 0px $dataview-item-background-color;
+        }
+
+        .#{$prefix}headercontainer .#{$prefix}gridcolumn.#{$prefix}locked,
+        .#{$prefix}grid-filterbar .#{$prefix}locked,
+        .#{$prefix}gridcell.#{$prefix}locked {
             background-color: $dataview-item-background-color;
         }
 
@@ -62,34 +66,51 @@ $csslockedgrid-default-ui: dynamic((
          * Set background colour for selected locked cells as they are
          * normally transparent and need to have the select colour manually
          * applied.
-         *
-         * NOTE: This needs to be updated for various themes.
          */
 
-        .x-gridrow.x-selected .x-gridcell,
-        .x-gridcell.x-selected {
-            background-color: $dataview-item-selected-background-color;
+        // Row hovered
+        .#{$prefix}gridrow.#{$prefix}hovered {
+            .#{$prefix}cells-el,
+            .#{$prefix}gridcell,  {
+                background-color: $dataview-item-hovered-background-color;
+                bo#{$prefix}shadow: none;
+            }
         }
 
-        .x-hovered  .x-gridcell{
-            background-color: $dataview-item-hovered-background-color;
+        // Row presssed
+        .#{$prefix}hovered.#{$prefix}pressed {
+            .#{$prefix}gridcell {
+                background-color: $dataview-item-pressed-background-color;
+                bo#{$prefix}shadow: none;
+            }
         }
 
-        .x-hovered.x-pressed  .x-gridcell {
-            background-color: $dataview-item-pressed-background-color;
+        // Row selected
+        .#{$prefix}gridrow.#{$prefix}selected {
+            .#{$prefix}cells-el,
+            .#{$prefix}gridcell {
+                background-color: $dataview-item-selected-background-color;
+                bo#{$prefix}shadow: none;
+            }
+        }
+
+        // Cell selected
+        .#{$prefix}gridcell.#{$prefix}selected {
+            background-color: $dataview-item-selected-background-color !important;
+            bo#{$prefix}shadow: none !important;
         }
 
         /**
          * Cell editing adjustment
          */
-        .x-celleditor {
+        .#{$prefix}celleditor {
             z-index: 9 !important;
         }
 
         /**
          * extender-drag-handle
          */
-        .x-selmodel-extender-drag-handle {
+        .#{$prefix}selmodel-extender-drag-handle {
             background-color: green;
         }
     }
