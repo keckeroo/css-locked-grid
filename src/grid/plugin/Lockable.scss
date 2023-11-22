@@ -73,7 +73,7 @@ $csslockedgrid-default-ui: dynamic((
             .#{$prefix}cells-el,
             .#{$prefix}gridcell,  {
                 background-color: $dataview-item-hovered-background-color;
-                bo#{$prefix}shadow: none;
+                box-shadow: none;
             }
         }
 
@@ -81,7 +81,7 @@ $csslockedgrid-default-ui: dynamic((
         .#{$prefix}hovered.#{$prefix}pressed {
             .#{$prefix}gridcell {
                 background-color: $dataview-item-pressed-background-color;
-                bo#{$prefix}shadow: none;
+                box-shadow: none;
             }
         }
 
@@ -90,14 +90,14 @@ $csslockedgrid-default-ui: dynamic((
             .#{$prefix}cells-el,
             .#{$prefix}gridcell {
                 background-color: $dataview-item-selected-background-color;
-                bo#{$prefix}shadow: none;
+                box-shadow: none;
             }
         }
 
         // Cell selected
         .#{$prefix}gridcell.#{$prefix}selected {
             background-color: $dataview-item-selected-background-color !important;
-            bo#{$prefix}shadow: none !important;
+            box-shadow: none !important;
         }
 
         /**
