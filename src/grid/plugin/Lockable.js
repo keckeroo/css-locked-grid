@@ -86,6 +86,11 @@ Ext.define('Ext.grid.plugin.CssLockedGrid', {
                 // differentiate between lockable plugin and Ext.grid.locked.Grid
                 isCssLockedGrid: true,
 
+                onStoreLoad: function() {
+                    this.callParent();
+                    plugin.refreshRegions();
+                },
+
                 getRegions: function() {
                     return plugin.getRegions();
                 },
