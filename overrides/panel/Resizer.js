@@ -4,7 +4,7 @@
  * values. This also includes logic to incorporate minWidth of sibling when in split mode for 
  * resizer constraints
  */
-Ext.define('cssLockedGrid.panel.Resizer', {
+Ext.define('EXTJS_UNFILED_JIRA_001.panel.Resizer', {
     override: 'Ext.panel.Resizer',
 
     privates: {
@@ -12,9 +12,9 @@ Ext.define('cssLockedGrid.panel.Resizer', {
          * @property {Object} edgeInfoMap
          * Meta information about each edge.
          *
-         * ADDED 'sibling' method for north/south/east/west edges so that
-         * we may reference target slibling when in split mode. This is critical
-         * so that divider constraints can respect sibling minWidth 
+         * ADDED 'sibling' property defining method to retrieve any north/south/east/west
+         * sibling for this panel when in split mode. This is critical so that the divider
+         * constraints can respect sibling minWidth.
          * @private
          */
         edgeInfoMap: {
@@ -264,7 +264,6 @@ Ext.define('cssLockedGrid.panel.Resizer', {
 
             w = newBox.width;
             h = newBox.height;
-//            console.log(newBox);
 
             snappedWidth = horz ? this.snap(w, info.snapWidth, offsetWidth > 0) : w;
             snappedHeight = vert ? this.snap(h, info.snapHeight, offsetHeight > 0) : h;
@@ -415,7 +414,8 @@ Ext.define('cssLockedGrid.panel.Resizer', {
                     resizeTarget.setFlex(null);
                 }
 
-                if (posChanged && !positioned) {
+//              if (posChanged && !positioned) { // added this but do not remember why .. it breaks floating window resizing
+                if (posChanged) { // Revert to original logic
                     positionEnd = !floated && onTarget;
 
                     if (positionEnd) {
