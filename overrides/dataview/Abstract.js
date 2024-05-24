@@ -12,7 +12,8 @@ Ext.define('EXTJS_30089.dataview.Abstract', {
         if (Ext.scrollbar.width()) {
             me.bodyElement.on({
                 'touchstart': '_checkScrollbarTouch',
-                'touchend'  : '_checkScrollbarTouch'
+                'touchend'  : '_checkScrollbarTouch',
+                scope: me
             });
         }
     },
