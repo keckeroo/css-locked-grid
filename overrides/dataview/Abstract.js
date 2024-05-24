@@ -6,7 +6,7 @@ Ext.define('EXTJS_30089.dataview.Abstract', {
 
         me.callParent();
 
-        // If there are space-taking scrollbars, prevent mousdown on a scrollbar
+        // If there are space-taking scrollbars, prevent mousedown on a scrollbar
         // from focusing the view. This event will percolate up to the view if not
         // first stopped by any child element.
         if (Ext.scrollbar.width()) {
