@@ -1,125 +1,21 @@
 /**
  * This override fixes issues with resizer not preventing continued resizing of the target
  * container (the one with the resizer configured) when the resizer is dragged beyond constraint
- * values. This also includes logic to incorporate minWidth of sibling when in split mode for 
+ * values. This also includes logic to incorporate minWidth of sibling when in split mode for
  * resizer constraints
+ *
+ * Issues resolved (as resizer):
+ * - Resizing centered floating component should increment size by 2 pixels for each pixel
+ *   resized as centering should increase both the side being resized and its opposite side.
+ * - Resizing must check computedStyle as dialogs have CSS driven min-width as a default.
+ *
+ * Issues resolved (as split)
+ * - Respect min/max width of split target sibling
  */
 Ext.define('EXTJS_UNFILED_JIRA_001.panel.Resizer', {
     override: 'Ext.panel.Resizer',
 
     privates: {
-        /**
-         * @property {Object} edgeInfoMap
-         * Meta information about each edge.
-         *
-         * ADDED 'sibling' property defining method to retrieve any north/south/east/west
-         * sibling for this panel when in split mode. This is critical so that the divider
-         * constraints can respect sibling minWidth.
-         * @private
-         */
-        edgeInfoMap: {
-            north: {
-                vert: true,
-                constrainProp: {
-                    vert: 'bottom'
-                },
-                adjustHeightOffset: -1,
-                splitPosSetter: 'setY',
-                oppSplitPosSetter: 'setX',
-                sizeProp: 'height',
-                startEdge: 'top',
-                sibling: 'nextSibling',
-                touchAction: { panY: false }
-            },
-            northeast: {
-                horz: true,
-                vert: true,
-                corner: true,
-                constrainProp: {
-                    horz: 'left',
-                    vert: 'bottom'
-                },
-                adjustHeightOffset: -1,
-                adjustWidthOffset: 1,
-                touchAction: { panX: false, panY: false }
-            },
-            east: {
-                horz: true,
-                constrainProp: {
-                    horz: 'left'
-                },
-                adjustWidthOffset: 1,
-                splitPosSetter: 'setX',
-                oppSplitPosSetter: 'setY',
-                sizeProp: 'width',
-                startEdge: 'right',
-                sibling: 'nextSibling',
-                touchAction: { panX: false }
-            },
-            southeast: {
-                horz: true,
-                vert: true,
-                corner: true,
-                constrainProp: {
-                    horz: 'left',
-                    vert: 'top'
-                },
-                adjustHeightOffset: 1,
-                adjustWidthOffset: 1,
-                touchAction: { panX: false, panY: false }
-            },
-            south: {
-                vert: true,
-                constrainProp: {
-                    vert: 'top'
-                },
-                adjustHeightOffset: 1,
-                splitPosSetter: 'setY',
-                oppSplitPosSetter: 'setX',
-                sizeProp: 'height',
-                startEdge: 'bottom',
-                sibling: 'previousSibling',
-                touchAction: { panY: false }
-            },
-            southwest: {
-                horz: true,
-                vert: true,
-                corner: true,
-                constrainProp: {
-                    horz: 'right',
-                    vert: 'top'
-                },
-                adjustHeightOffset: 1,
-                adjustWidthOffset: -1,
-                touchAction: { panX: false, panY: false }
-            },
-            west: {
-                horz: true,
-                constrainProp: {
-                    horz: 'right'
-                },
-                adjustWidthOffset: -1,
-                splitPosSetter: 'setX',
-                oppSplitPosSetter: 'setY',
-                sizeProp: 'width',
-                startEdge: 'left',
-                sibling: 'previousSibling',
-                touchAction: { panX: false }
-            },
-            northwest: {
-                horz: true,
-                vert: true,
-                corner: true,
-                constrainProp: {
-                    horz: 'right',
-                    vert: 'bottom'
-                },
-                adjustHeightOffset: -1,
-                adjustWidthOffset: -1,
-                touchAction: { panX: false, panY: false }
-            }
-        },
-
         handleDragStart: function(e) {
             var me = this,
                 emptyConstrain = me.emptyConstrain,
@@ -131,12 +27,12 @@ Ext.define('EXTJS_UNFILED_JIRA_001.panel.Resizer', {
                 horz = edge.horz,
                 vert = edge.vert,
                 region = target.element.getRegion(),
-                split = me.getSplit(),
                 snap = me.getSnap() || emptyConstrain,
                 minSize = me.getMinSize() || emptyConstrain,
                 maxSize = me.getMaxSize() || emptyConstrain,
                 defaultMinSize = me.defaultMinSize,
                 defaultMaxSize = me.defaultMaxSize,
+                isCentered = target.isCentered(),
                 info, proxy, context, asFloat, layout, layoutVert, clearFlex, sibling;
 
             if (hasListeners.beforeresizedragstart) {
@@ -150,9 +46,16 @@ Ext.define('EXTJS_UNFILED_JIRA_001.panel.Resizer', {
                 }
             }
 
-            // Fetch target sibling if we are in split mode
-            if (split && edge.sibling) {
-                sibling = target[edge.sibling]();
+            // If we are in split mode and drag edge is not a corner, check for
+            // split sibling. If none or it is hidden, just return from drag as
+            // there is nothing to resize.
+            if (me.getSplit() && !edge.corner) {
+                sibling = (edge.adjustHeightOffset < 0 || edge.adjustWidthOffset < 0) ? target.previousSibling() : target.nextSibling();
+                if (!sibling || sibling.isHidden()) {
+                    e.stopPropagation();
+                    // Prevent any further drag events from completing
+                    return false;
+                }
             }
 
             asFloat = target.getFloated() || target.isPositioned();
@@ -167,25 +70,34 @@ Ext.define('EXTJS_UNFILED_JIRA_001.panel.Resizer', {
             }
 
             me.info = info = {
-                target: target,
-                edgeName: edgeName,
-                dynamic: dynamic,
-                startBox: region,
-                snapHeight: snap[1],
-                snapWidth: snap[0],
-                clearFlex: clearFlex,
-                positioned: (target.getTop() !== null || target.getLeft() !== null || target.getBottom() !== null || target.getRight !== null),
-                minHeight: me.calculateConstrain(target.getMinHeight(), minSize[1], defaultMinSize),
-                minWidth: me.calculateConstrain(target.getMinWidth(), minSize[0], defaultMinSize),
-                maxHeight: me.calculateConstrain(target.getMaxHeight(), maxSize[1], defaultMaxSize),
-                maxWidth: me.calculateConstrain(target.getMaxWidth(), maxSize[0], defaultMaxSize),
-                edge: edge,
-                asFloat: asFloat,
-                preserveRatio: asFloat ? me.getPreserveRatio() : false,
-                ratio: asFloat ? region.width / region.height : 0,
-                start: region[edge.startEdge],
-                floated: target.getFloated(),
-                sibling: sibling // pass along sibling info
+                target        : target,
+                edgeName      : edgeName,
+                dynamic       : dynamic,
+                startBox      : region,
+                snapHeight    : snap[1],
+                snapWidth     : snap[0],
+                clearFlex     : clearFlex,
+                // Note well - positioned here does not use target.isPositioned as that
+                // returns false for any floated component.
+                positioned    : (target.getTop() !== null || target.getLeft() !== null || target.getBottom() !== null || target.getRight() !== null),
+                // Note well - check for CSS min-width style which is applied in some components even if a value
+                // is not specified on the component directly.
+                minHeight     : me.calculateConstrain(target.getMinHeight() || target.el.getStyle('min-height'), minSize[1], defaultMinSize),
+                minWidth      : me.calculateConstrain(target.getMinWidth() || target.el.getStyle('min-width'), minSize[0], defaultMinSize),
+                maxHeight     : me.calculateConstrain(target.getMaxHeight(), maxSize[1], defaultMaxSize),
+                maxWidth      : me.calculateConstrain(target.getMaxWidth(), maxSize[0], defaultMaxSize),
+                isCentered    : isCentered,
+                edge          : edge,
+                asFloat       : asFloat,
+                preserveRatio : asFloat ? me.getPreserveRatio() : false,
+                ratio         : asFloat ? region.width / region.height : 0,
+                start         : region[edge.startEdge],
+                floated       : target.getFloated(),
+                sibling       : sibling, // pass along sibling info
+                modifiesX     : asFloat && edge.adjustWidthOffset < 0 && !isCentered,  // if centered, we do not modify X (setting size alone will position target correctly)
+                modifiesY     : asFloat && edge.adjustHeightOffset < 0 && !isCentered, // if centered, we do not modify Y (setting size alone will position target correctly)
+                adjustWidthOffset: edge.adjustWidthOffset * (isCentered ? 2 : 1),      // if centered multiply adjust offset by 2 as we are resizing in both vertical and horizontal directions at same time
+                adjustHeightOffset: edge.adjustHeightOffset * (isCentered ? 2 : 1),    // if centered multiply adjust offset by 2 as we are resizing in both vertical and horizontal directions at same time
             };
 
             if (!dynamic) {
@@ -238,16 +150,19 @@ Ext.define('EXTJS_UNFILED_JIRA_001.panel.Resizer', {
             vert = edge.vert;
             offsetWidth = 0;
             offsetHeight = 0;
-            adjustWidthOffset = edge.adjustWidthOffset;
-            adjustHeightOffset = edge.adjustHeightOffset;
-            modifiesX = asFloat && edge.adjustWidthOffset < 0;
-            modifiesY = asFloat && edge.adjustHeightOffset < 0;
+            adjustWidthOffset = info.adjustWidthOffset;
+            adjustHeightOffset = info.adjustHeightOffset;
+            modifiesX = info.modifiesX;
+            modifiesY = info.modifiesY;
             minHeight = info.minHeight;
-            minWidth = info.minWidth;
+            minWidth  = info.minWidth;
             maxHeight = info.maxHeight;
-            maxWidth = info.maxWidth;
+            maxWidth  = info.maxWidth;
 
             if (adjustWidthOffset) {
+                // Keep - testing for visual artifact when mouse is moved rapidly beyond
+                // min/max values
+                // offsetWidth = Ext.Number.constrain(Math.round(adjustWidthOffset * e.deltaX), minWidth - box.width, maxWidth - box.width);
                 offsetWidth = Math.round(adjustWidthOffset * e.deltaX);
             }
 
@@ -299,7 +214,6 @@ Ext.define('EXTJS_UNFILED_JIRA_001.panel.Resizer', {
 
             if (asFloat && (info.preserveRatio || e.shiftKey)) {
                 ratio = info.ratio;
-
                 h = Math.min(Math.max(minHeight, w / ratio), maxHeight);
                 // Use newBox.height because we just overwrote h
                 w = Math.min(Math.max(minWidth, newBox.height * ratio), maxWidth);
@@ -361,11 +275,9 @@ Ext.define('EXTJS_UNFILED_JIRA_001.panel.Resizer', {
                 horz = edge.horz,
                 vert = edge.vert,
                 floated = info.floated,
-                split = me.getSplit(),
                 onTarget = info.dynamic || atEnd,
                 positioned = info.positioned,
                 resizeTarget, isProxy, prop, diff, offset,
-                targetSibling = target.nextSibling() || target.previousSibling(),
                 targetParent, parentXY, positionEnd;
 
             // If dynamic or at drag end - we are going to resize the target
@@ -375,7 +287,7 @@ Ext.define('EXTJS_UNFILED_JIRA_001.panel.Resizer', {
             else {
                 // otherwise we are resizing the proxy
                 resizeTarget = info.proxy;
-                positioned = false;
+//                positioned = false;
                 isProxy = true;
             }
 
@@ -386,26 +298,7 @@ Ext.define('EXTJS_UNFILED_JIRA_001.panel.Resizer', {
                 resizeTarget[edge.splitPosSetter](info.start + diff);
             }
             else {
-                // Prevent any adjustments in box sizing if we computed a new width/height which is
-                // outside the constraints of the resizer based on sibling information.
-                if (split && !atEnd) {
-                    if (
-                        horz && (newBox.width  >= info.maxWidth  || newBox.width  <= info.minWidth) ||
-                        vert && (newBox.height >= info.maxHeight || newBox.height <= info.minHeight)
-                    ) {
-                        // We are dragging out of bounds - just stop it.
-                        return;
-                    }
-                }
-
-//                console.log('>>> resizeTarget.setSize(',                    horz ? newBox.width : 'nada', ',', vert ? newBox.height : 'nada', ') ', resizeTarget.id );
-//                console.log('>>> posChanged: ', posChanged);
-//                console.log(`${box.x} !== ${x} || ${box.y} !== ${y}`),
-//                console.log('>>> asFloat: ', asFloat);
-//                console.log('>>> floated: ', floated);
-//                console.log('>>> positioned: ', positioned);
-//                console.log('>>> resizeTarget: ', resizeTarget);
-
+                // Resize the target with new height / width dimensions.
                 resizeTarget.setSize(
                     horz ? newBox.width : undefined, vert ? newBox.height : undefined
                 );
@@ -414,8 +307,15 @@ Ext.define('EXTJS_UNFILED_JIRA_001.panel.Resizer', {
                     resizeTarget.setFlex(null);
                 }
 
-//              if (posChanged && !positioned) { // added this but do not remember why .. it breaks floating window resizing
-                if (posChanged) { // Revert to original logic
+                // New change - ensure we only do this if the component is NOT
+                // positioned (ie - it does not have top/right/bottom/left positioning
+                // values set.
+//                console.log(posChanged, positioned, floated, onTarget);
+                if (posChanged && !positioned) {
+                    // Note: continue to monitor this config value as currently cannot
+                    // determine if/when this is ever triggered as posChange signifies 
+                    // that x/y has been modified but not sure how this happens when 
+                    // target is not floated.
                     positionEnd = !floated && onTarget;
 
                     if (positionEnd) {
@@ -493,6 +393,7 @@ Ext.define('EXTJS_UNFILED_JIRA_001.panel.Resizer', {
                 box = info.startBox;
                 parentBox = Ext.fly(parent).getRegion();
                 edge = info.edge;
+                sibling = info.sibling;
                 invertMap = me.sideInvertMap;
 
                 if (edge.horz) {
@@ -500,9 +401,14 @@ Ext.define('EXTJS_UNFILED_JIRA_001.panel.Resizer', {
                     info.maxWidth = Math.min(
                         info.maxWidth, Math.abs(box[prop] - parentBox[invertMap[prop]])
                     );
-                    // Respect sibling minWidth value - this is the magic
-                    if (info.sibling) {
-                        info.maxWidth -= info.sibling.getMinWidth();
+                    // Respect sibling min/maxWidth value - this is the magic
+                    if (sibling) {
+                        if (sibling.getMinWidth()) {
+                            info.maxWidth = Math.min( parentBox.width - info.sibling.getMinWidth(), info.maxWidth );
+                        }
+                        if (sibling.getMaxWidth()) {
+                            info.minWidth = Math.max( parentBox.width - info.sibling.getMaxWidth(), info.minWidth );
+                        }
                     }
                 }
 
@@ -511,9 +417,14 @@ Ext.define('EXTJS_UNFILED_JIRA_001.panel.Resizer', {
                     info.maxHeight = Math.min(
                         info.maxHeight, Math.abs(box[prop] - parentBox[invertMap[prop]])
                     );
-                    // Respect sibling minWidth value - and more magic
-                    if (info.sibling) {
-                        info.maxHeight -= info.sibling.getMin();
+                    // Respect sibling min/maxHeight value - and more magic
+                    if (sibling) {
+                        if (sibling.getMinHeight()) {
+                            info.maxHeight = Math.min( parentBox.height - info.sibling.getMinHeight(), info.maxHeight );
+                        }
+                        if (sibling.getMaxHeight()) {
+                            info.minHeight = Math.max( parentBox.height - info.sibling.getMaxHeight(), info.minHeight ) + 10;
+                        }
                     }
                 }
             }
