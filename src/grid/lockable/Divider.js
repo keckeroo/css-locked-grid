@@ -8,7 +8,7 @@ Ext.define('Ext.grid.lockable.RegionDivider', {
     config: {
         grid   : null,
         region : null,
-        width  : 1
+        width  : 2
     },
 
     baseCls: Ext.baseCSSPrefix + 'grid-region-divider',
@@ -18,6 +18,7 @@ Ext.define('Ext.grid.lockable.RegionDivider', {
 
         me.getGrid().on({
             scope: me,
+            viewready: 'showDivider',
             refresh: 'showDivider',
             resize: 'showDivider',
             columnadd: 'showDivider',
@@ -65,7 +66,7 @@ Ext.define('Ext.grid.lockable.RegionDivider', {
             dockedItems.forEach(item => {
                 switch (item.getDocked()) {
                     case 'top':
-                        if (['headercontainer', 'container'].includes(item.xtype)) {
+                        if (['headercontainer', 'fieldpanel', 'container', 'panel'].includes(item.xtype)) {
                             height += item.getSize().height;
                             break;
                         }

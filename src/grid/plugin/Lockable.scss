@@ -51,16 +51,17 @@ $csslockedgrid-default-ui: dynamic((
 
         .#{$prefix}headercontainer .#{$prefix}gridcolumn.#{$prefix}locked,
         .#{$prefix}grid-filterbar .#{$prefix}locked,
-        .#{$prefix}gridcell.#{$prefix}locked {
+        .#{$prefix}gridcell.#{$prefix}locked:not(.colored) {
             z-index: 10;  // Mask is z-index 10
-            bo#{$prefix}shadow: 0px -1px 0px 0px $dataview-item-background-color, 0px 2px 0px 0px $dataview-item-background-color;
-        }
-
-        .#{$prefix}headercontainer .#{$prefix}gridcolumn.#{$prefix}locked,
-        .#{$prefix}grid-filterbar .#{$prefix}locked,
-        .#{$prefix}gridcell.#{$prefix}locked {
+            box-shadow: 0px -1px 0px 0px $dataview-item-background-color, 0px 2px 0px 0px $dataview-item-background-color;
             background-color: $dataview-item-background-color;
         }
+
+//        .#{$prefix}headercontainer .#{$prefix}gridcolumn.#{$prefix}locked,
+//        .#{$prefix}grid-filterbar .#{$prefix}locked,
+//        .#{$prefix}gridcell.#{$prefix}locked {
+//            background-color: $dataview-item-background-color;
+//        }
 
         /*
          * Set background colour for selected locked cells as they are

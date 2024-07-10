@@ -1,48 +1,43 @@
 /**
- * Updates to FilterBar to make it work with css locked grid columns.
+ * Address issues scroll navigation issues with FilterBar
+ * Jira TBD
  */
-Ext.define('cssLockedGrid.grid.plugin.filterbar.FilterBar', {
+Ext.define(null, {
     override: 'Ext.grid.plugin.filterbar.FilterBar',
 
-    updateGrid: function (grid, oldGrid) {
-        var me = this,
-            listeners = me.getHeaderListeners();
-
-        me.callSuper([grid, oldGrid]);
-
-        me.listenersHeader = Ext.destroy(me.listenersHeader);
-
-        if (grid && listeners) {
-            me.listenersHeader = grid.getHeaderContainer().on(Ext.apply(listeners, {
-                scope: me,
-                destroyable: true
-            }));
-        }
-    },
-
-    updateBar: function (bar) {
+    createFilterBar: function() {
         var me = this,
             grid = me.getGrid(),
-            header = grid && grid.getHeaderContainer();
+            header = grid.getHeaderContainer(),
+            pos = grid.indexOf(header) || 0;
+ 
+        if (grid.initialized) {
 
-        if (bar) {
-            header.getScrollable().addPartner(bar.getScrollable(), 'x');
-            me.initializeFilters(header.getColumns());
+            var x = me.setBar(grid.insert(pos + 1, {
+                xtype: 'fieldpanel',
+                hidden: me.getHidden(),
+                cls: [me.filterBarCls, Ext.baseCSSPrefix + 'headercontainer'],
+                docked: 'top',
+                // the column header container has a weight of 100 so we want
+                // to dock it after that.
+                weight: 110,
+                weighted: true,
+                autoSize: null,
+                manageBorders: true,
+                layout: {
+                    type: 'hbox',
+                    align: 'stretch'
+                },
+                scrollable: {
+                    type: 'virtual',
+                    x: false,
+                    y: false,
+                    indicators: {
+                        x: false,
+                        y: false
+                    }
+                }
+            }));
         }
-    },
-
-    onColumnAdd: function (header, column, index) {
-        var bar = this.getBar(),
-            filter = column.getFilterType();
-
-        if (!bar) {
-            return;
-        }
-
-        if (!filter || !filter.isGridFilter) {
-            filter = this.createColumnFilter(column);
-        }
-
-        bar.insert(index, filter.getField());
-    },
+    }
 })

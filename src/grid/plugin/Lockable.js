@@ -86,10 +86,7 @@ Ext.define('Ext.grid.plugin.CssLockedGrid', {
                 // differentiate between lockable plugin and Ext.grid.locked.Grid
                 isCssLockedGrid: true,
 
-                onStoreLoad: function() {
-                    this.callParent();
-                    plugin.refreshRegions();
-                },
+                manageHorizontalOverflow: false,
 
                 getRegions: function() {
                     return plugin.getRegions();
@@ -146,8 +143,9 @@ Ext.define('Ext.grid.plugin.CssLockedGrid', {
                         clientSize = scroller.getClientSize(),
                         leftOffset = 0,
                         rightOffset = 0,
-//                        clientSize,
                         overflow;
+
+//                        console.log('client size is ', clientSize);
 
                     if (scrollerSize) {
                         overflow = clientSize.x - scrollerSize.x;
@@ -198,7 +196,9 @@ Ext.define('Ext.grid.plugin.CssLockedGrid', {
             scope: me,
 
             hide: 'onHide',
-            refresh: 'refreshRegions',
+            viewready: 'refreshRegions',
+
+            //            refresh: 'refreshRegions',
             resize: 'refreshRegions',
             columnadd: 'refreshRegions',
             columnremove: 'refreshRegions',
@@ -206,8 +206,9 @@ Ext.define('Ext.grid.plugin.CssLockedGrid', {
             columnshow: 'refreshRegions',
             columnmove: 'refreshRegions',
             columnresize: 'refreshRegions',
+
             beforeshowcolumnmenu: 'onBeforeShowColumnMenu',
-            columnlockedchange: 'refreshRegions'
+//            columnlockedchange: 'refreshRegions'
         })
     },
 
@@ -231,13 +232,18 @@ Ext.define('Ext.grid.plugin.CssLockedGrid', {
         },
 
         onContainerScroll: function (scroller, x, y, dx, dy) {
+            if (dx !== 0) {
+//                console.log('scroller: ', scroller.id);
+//                debugger;
+            }
             // Only refresh if horizontal scroll detected
-//            if (dx !== 0) {
-                this.refreshRegions(true);
-//            }
+            if (dx !== 0) {
+                this.refreshRegions(true, dx, dy);
+            }
+                
         },
 
-        refreshRegions: function (isScroll) {
+        refreshRegions: function (isScroll, dx, dy) {
             var me = this,
                 grid = me.getCmp(),
                 use3d = true,
@@ -245,17 +251,33 @@ Ext.define('Ext.grid.plugin.CssLockedGrid', {
                 offsets = grid.getRegionOffsets(),
                 lockedLeft = grid.el.query('.x-locked.x-locked-left'),
                 lockedRight = grid.el.query('.x-locked.x-locked-right'),
+//                rowHeaders = grid.el.query('.x-rowheader:not(.x-pinned)'),
+//                headerWidth = grid.getScrollable().getClientSize().x,
                 translateLeft = use3d ? `translate3d(${offsets.left}px, 0px, 0px)` : `translate(${offsets.left}px, 0px)`,
                 translateRight = use3d ? `translate3d(${offsets.right}px, 0px, 0px)` : `translate(${offsets.right}px, 0px)`,
                 centerBox = grid.getCenterRegionBox();
 
-            lockedLeft.forEach(function (el) {
-                el.style.transform = translateLeft;
-            });
+            if (dx) {
+                lockedLeft.forEach(function (el) {
+                    el.style.transform = translateLeft;
+                });
 
-            lockedRight.forEach(function (el) {
-                el.style.transform = translateRight;
-            });
+                lockedRight.forEach(function (el) {
+                    el.style.transform = translateRight;
+                });
+            }
+
+            // Adjust row headers/footers so that they fit the current grid width so that
+            // the entire header is visible at all times and doesn't scroll. Adjust offset
+            // of the header as grid scrolls horizontally.
+//            if (dx) {
+//                rowHeaders.forEach(function (el) {
+//                    Ext.get(el).setStyle({
+//                        width: `${headerWidth}px`,
+//                        left: `${offsets.left}px`
+//                    });
+//                });
+//            }
 
             if (scroller.isVirtualScroller && isScroll !== true) {
                 // KEEP THIS ORDER UNTIL WE RECONFIGURE WITH BETTER LOCKED

@@ -2,9 +2,46 @@ Ext.define(null, {
     override: 'Ext.scroll.Scroller',
 
     privates: {
+
+        callPartners: function(method, scrollX, scrollY, deltaX, deltaY) {
+            var me = this,
+                partners = me._partners,
+                axes, id, partner, pos, scroller, x, y;
+
+            if (!me.suspendSync) {
+                for (id in partners) {
+                    partner = partners[id];
+                    scroller = partner.scroller;
+
+                    if (!scroller.isPrimary && !partner.called) {
+                        partner.called = true; // this flag avoids infinite recursion
+                        axes = partners[id].axes;
+                        pos = scroller.position;
+
+                        x = (!axes.x || scrollX === undefined) ? pos.x : scrollX;
+                        y = (!axes.y || scrollY === undefined) ? pos.y : scrollY;
+
+                        if (!axes.x) {
+                            console.log('DEBUGGER DEBUGGER ... we are not scrolling in X!!!!!!');
+                            console.log(x, pox.x);
+                        }
+//                        scroller[method](x, y, (x - pos.x) || 0, (y - pos.y) || 0); // ORIGINAL
+                        scroller[method](x, y, deltaX || 0, deltaY || 0);
+
+                        scroller.callPartners(method, x, y); // , deltaX, deltaY);
+
+                        partner.called = false;
+                    }
+                }
+            }
+        },
+
         getEnsureVisibleXY: function (el, options) {
             var position = this.getPosition(),
                 viewport = this.component ? this.component.getScrollableClientRegion() : this.getElement(),
+                location = options.location,
+                isCssLockedGrid = location && location.view && location.view.isCssLockedGrid,
+                isCenterRegion  = isCssLockedGrid && location.column.getRegion() === 'center',
                 newPosition, align;
 
             if (el && el.element && !el.isElement) {
@@ -33,16 +70,15 @@ Ext.define(null, {
 
             newPosition = Ext.fly(el).getScrollIntoViewXY(viewport, position.x, position.y, align);
 
-            if (options.adjustForCenterRegion) {
+            // If location column is in center region, adjust position translations accordingly to ensure
+            // target cell is not hidden by any locked region.
+            if (isCenterRegion) { // location && options.adjustForCenterRegion) {
                 var scrollDirection = newPosition.x - position.x;
-                var view = options.location.view;
+                var view = location.view;
                 var centerRegionBox = view.getCenterRegionBox();
                 var cellBox = Ext.get(el).getBox();
                 var offsets = Ext.get(el).getOffsetsTo(view.el);
                 var borderPadding = view.el.getBorderPadding();
-
-//console.log('>>> border padding is ', borderPadding)
-//console.group('boxes');
 
                 // Adjust for local coordinates
                 cellBox.left = offsets[0];

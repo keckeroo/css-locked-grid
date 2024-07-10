@@ -15,7 +15,7 @@ Ext.define('cssLockedGrid.grid.NavigationModel', {
 
         me.columnIndex = -1;
 
-        if (location != null && !location.isGridLocation) {
+        if (location !== null && !location.isGridLocation) {
             if (Ext.isArray(location)) {
                 location = {
                     column: location[0],
@@ -31,12 +31,10 @@ Ext.define('cssLockedGrid.grid.NavigationModel', {
         }
 
         // >>>>> NEW CODE
-        if (view.isCssLockedGrid && location && !location.column.getLocked() && view.hasLockedRegions()) {
-            Ext.apply(options, {
-                adjustForCenterRegion: true,
-                location: location
-            })
-        }
+        // Pass current location along in options so it can eventually make it to
+        // the scroller for computing center region information if we are in a locked
+        // grid.
+        options.location = location;
         // <<<<< END NEW CODE
 
         return me.callSuper([
