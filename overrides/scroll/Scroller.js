@@ -117,7 +117,7 @@ Ext.define(null, {
                         // Otherwise, align end of cell to right side of region
 //                        console.log('aligning right side of cell to right side of center region')
 //                        console.log('>> right values are ', centerRegionBox.right, viewport.right)
-                        newPosition.x = newPosition.x + centerRegionBox.right;
+                        newPosition.x = newPosition.x + (viewport.right - centerRegionBox.right)
                     }
                 }
 //                console.log('new position is ', newPosition.x);
