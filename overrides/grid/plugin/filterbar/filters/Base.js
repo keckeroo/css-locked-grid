@@ -25,8 +25,13 @@ Ext.define(null, {
     onFieldSpecialKey: function(field, e) {
         var keyCode = e.getKey(),
             grid = this.grid,
-            scrollable = grid.getScrollable(),
+            owner = this.owner,
+            scrollable = owner.getBar().getScrollable(),
+            nav = grid.getNavigationModel(),
+            location = grid.createLocation(nav),
             targetField;
+
+        location.column = this.column;
 
         if ((keyCode === e.ESC) && !Ext.isEmpty(field.getValue())) {
             if (field.clearValue) {
@@ -46,9 +51,12 @@ Ext.define(null, {
 
             // Determine target field (if any) based on tab direction.
             targetField = e.shiftKey ? field.previousSibling("[isInputField]") : field.nextSibling("[isInputField]");
-            
+
             // If found, focus field - the focus handler will ensure field is scrolled into view.
             if (targetField) {
+                scrollable.ensureVisible(targetField.el, {
+                    location: location
+                });
                 targetField.focus();
             }
         }
@@ -61,7 +69,8 @@ Ext.define(null, {
      */
     onFieldFocus: function(field, e) {
         var grid = this.grid,
-            scrollable = grid.getScrollable(),
+            owner = this.owner,
+            scrollable = owner.getBar().getScrollable(),
             nav = grid.getNavigationModel(),
             location = grid.createLocation(nav);
 

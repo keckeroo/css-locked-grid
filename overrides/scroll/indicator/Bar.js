@@ -5,6 +5,23 @@
 Ext.define('cssLockedGrid.scroll.indicator.Bar', {
     override: 'Ext.scroll.indicator.Bar',
 
+    constructor: function(config) {
+        var me = this,
+            cmp;
+
+        me.callSuper([ config ]);
+
+        cmp = me.getScroller().component;
+
+        // set the owner of the scroll component
+        me.ownerCmp = cmp && cmp.ownerCmp;
+
+        // Fix for lagging scroll behaviour when dragging indicator element
+        me.element.on('scroll', 'onScrollbarScroll', me, {
+            buffer: me.getAxis() === 'y' ? 50 : 0
+        });
+    },
+
     privates: {
         // For reference
         xonRefresh: function() {

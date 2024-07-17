@@ -1,33 +1,35 @@
 Ext.define(null, {
     override: 'Ext.dataview.List',
 
+    onBodyResize: function(el, info) {
+        var me = this,
+            height = info.height,
+            width = info.width;
+
+        if (width === me.getVisibleWidth()) {
+            me.setVisibleHeight(height);
+        }
+        else {
+            // Since updateVisibleWidth will be called, we don't want to waste
+            // time doing a horz sync... we'll handle it all in the vertical
+            me.suspendSync = true;
+            me.setVisibleHeight(me.outerCt.measure('h'));
+            me.suspendSync = false;
+
+            me.setVisibleWidth(width);
+            me.refreshScrollerSize();
+            me.refreshItemHeaders(); //++
+        }
+
+        me.refresh(); //++
+    },
+
     privates: {
         onContainerScroll: function(scroller, x, y, dx, dy) {
             var me = this;
 
             me.callParent([ scroller, x, y, dx, dy ]);
             me.refreshItemHeaders(); //++
-        },
-
-        onBodyResize: function(el, info) {
-            var me = this,
-                height = info.height,
-                width = info.width;
-     
-            if (width === me.getVisibleWidth()) {
-                me.setVisibleHeight(height);
-            }
-            else {
-                // Since updateVisibleWidth will be called, we don't want to waste
-                // time doing a horz sync... we'll handle it all in the vertical
-                me.suspendSync = true;
-                me.setVisibleHeight(me.outerCt.measure('h'));
-                me.suspendSync = false;
-     
-                me.setVisibleWidth(width);
-                me.refreshScrollerSize();
-                me.refreshItemHeaders(); //++
-            }
         },
 
         /*
